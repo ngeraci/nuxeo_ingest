@@ -13,15 +13,17 @@ def main(args=None):
     """
     parser = argparse.ArgumentParser(
         description='''build folder structure for a Nuxeo collection,
-                       based on local folder structure. make sure you're
-                       in the parent directory for the collection when
-                       you run this script.''')
+                       based on local folder structure.''')
     parser.add_argument(
         "nuxeo_path", nargs=1, help='''path to parent folder in Nuxeo.
                                       be sure to enclose it in quotation
                                       marks if it contains whitespace.
 
                                       Example: "/asset-library/UCR/University Archives/Highlander"''')
+    parser.add_argument(
+        "local_directory", nargs="?", help='''path to local directory whose structure
+                                              you want to replicate. if no value is given,
+                                              it defaults to your current working directory.''')
 
     # print help if no args given
     if len(sys.argv) == 1:
@@ -33,16 +35,19 @@ def main(args=None):
         args = parser.parse_args()
 
     nuxeo_path = args.nuxeo_path[0]
-    folders = get_recursive_folders()
+    try:
+        folders = get_recursive_folders(args.local_directory[0])
+    except IndexError:
+        folders = get_recursive_folders(".")
     make_folder_structure(nuxeo_path, folders)
     verify(nuxeo_path, folders)
 
-def get_recursive_folders():
+def get_recursive_folders(local_directory):
     """Returns list of all folders within current folder.
 
     """
     folders = []
-    for path, dirs, files in os.walk("."):
+    for path, dirs, files in os.walk(local_directory):
         # exclude hidden directories
         dirs[:] = [d for d in dirs if not d[0] == '.']
         # exclude root directory
@@ -74,7 +79,6 @@ def verify(nuxeo_path, local_folders):
     Local folders: {}
     Nuxeo folders: {}
     """.format(len(local_folders), len(nx_list))
-
 
     if len(nx_list) != len(local_folders):
         print(warning)
