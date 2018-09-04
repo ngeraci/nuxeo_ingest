@@ -35,10 +35,11 @@ def main(args=None):
         args = parser.parse_args()
 
     nuxeo_path = args.nuxeo_path[0]
-    try:
-        folders = get_recursive_folders(args.local_directory[0])
-    except IndexError:
+    if args.local_directory:
+        folders = get_recursive_folders(args.local_directory)
+    else:
         folders = get_recursive_folders(".")
+
     make_folder_structure(nuxeo_path, folders)
     verify(nuxeo_path, folders)
 
@@ -51,18 +52,41 @@ def get_recursive_folders(local_directory):
         # exclude hidden directories
         dirs[:] = [d for d in dirs if not d[0] == '.']
         # exclude root directory
-        if len(path) > 1:
-            # trim first character
-            folders.append(path[1:])
+        if path != local_directory:
+            # remove first segment of path & append to list
+            path = splitall(path)
+            path.pop(0)
+            folders.append(os.path.join(*path))
 
     return folders
+
+def splitall(path):
+    """ Split apart all parts of path.
+    Reference:
+    https://www.safaribooksonline.com/library/view/python-cookbook/0596001673/ch04s16.html
+
+    """
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
+
 
 def make_folder_structure(nuxeo_path, local_folders):
     """Run the command that makes the folders.
 
     """
     for folder in local_folders:
-        subprocess.run(["nx", "mkdoc", "-t", "Organization", "".join([nuxeo_path, folder])],
+        subprocess.run(["nx", "mkdoc", "-t", "Organization", "/".join([nuxeo_path, folder])],
                        check=True)
 
 def verify(nuxeo_path, local_folders):
