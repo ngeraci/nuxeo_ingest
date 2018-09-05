@@ -21,9 +21,9 @@ def main(args=None):
 
                                       Example: "/asset-library/UCR/University Archives/Highlander"''')
     parser.add_argument(
-        "local_directory", nargs="?", help='''path to local directory whose structure
-                                              you want to replicate. if no value is given,
-                                              it defaults to your current working directory.''')
+        "local_directory", nargs=1, help='''path to local directory whose structure
+                                            you want to replicate. to use your current
+                                            working directory, use "."''')
 
     # print help if no args given
     if len(sys.argv) == 1:
@@ -35,11 +35,7 @@ def main(args=None):
         args = parser.parse_args()
 
     nuxeo_path = args.nuxeo_path[0]
-    if args.local_directory:
-        folders = get_recursive_folders(args.local_directory)
-    else:
-        folders = get_recursive_folders(".")
-
+    folders = get_recursive_folders(args.local_directory[0])
     make_folder_structure(nuxeo_path, folders)
     verify(nuxeo_path, folders)
 
