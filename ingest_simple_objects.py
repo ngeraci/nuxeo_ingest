@@ -2,13 +2,12 @@
 """Bulk loading simple objects to Nuxeo.
 
 """
-import os
 import sys
 import logging
 import datetime
 import argparse
 import subprocess
-from local_utils import splitall
+from local_utils import get_file_paths
 
 def main(args=None):
     """Main loop, parse command line argument.
@@ -39,7 +38,7 @@ def main(args=None):
     if args is None:
         args = parser.parse_args()
 
-    # TODO: make filename more granular (collection name?) to allow logging simultaneous processes
+    # TODO: make logfile name more granular to allow logging simultaneous processes
     logfile = "nuxeo-ingest_" + datetime.date.today().isoformat() + ".log"
     logging.basicConfig(filename=logfile, level=logging.INFO)
 
@@ -53,24 +52,6 @@ def main(args=None):
 
     verify(nuxeo_path, local_paths)
 
-def get_file_paths(local_directory, file_types):
-    """Return list of file paths in local directory.
-
-    """
-    local_file_paths = []
-    for root, dirs, files in os.walk(local_directory):
-        for file in files:
-            extension = os.path.splitext(file)[1]
-            if extension.startswith("."):
-                extension = extension[1:]
-            if extension in file_types:
-                filepath = os.path.join(root, file)
-                # remove first segment of path & append to list
-                filepath = splitall(filepath)
-                filepath.pop(0)
-                local_file_paths.append(os.path.join(*filepath))
-
-    return local_file_paths
 
 def nx_upload(file, local_directory, nuxeo_path):
     """Upload single file. Retry up to three times if error.
