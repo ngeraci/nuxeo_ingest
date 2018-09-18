@@ -2,6 +2,7 @@
 """Bulk loading simple objects to Nuxeo.
 
 """
+import os
 import sys
 import logging
 import datetime
@@ -72,8 +73,10 @@ def upfile(file, local_directory, nuxeo_path):
     """ nx upfile command. return stdout as string
 
     """
-    upload = subprocess.run(["nx", "upfile", "-doc", "/".join([nuxeo_path, file]),
-                             "".join([local_directory, file])],
+    source_file = os.path.join([local_directory, file])
+    upload_doc = "/".join([nuxeo_path, file])
+
+    upload = subprocess.run(["nx", "upfile", "-doc", upload_doc, source_file],
                             stdout=subprocess.PIPE).stdout.decode("utf-8")
 
     return upload
