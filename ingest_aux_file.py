@@ -73,7 +73,7 @@ def extrafile(aux_file, main_file, local_directory, nuxeo_dir):
     destination_doc = "/".join([nuxeo_dir, main_file])
 
     upload = subprocess.run(["nx", "extrafile", source_file, destination_doc],
-                             stdout=subprocess.PIPE).stdout.decode("utf-8")
+                            stdout=subprocess.PIPE).stdout.decode("utf-8")
 
     return upload
 
