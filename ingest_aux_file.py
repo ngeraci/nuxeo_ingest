@@ -51,7 +51,6 @@ def main(args=None):
 
     for aux in aux_paths:
         logging.info(nx_upload(aux, main_path(aux, "jpg"), local_directory, nuxeo_dir))
-        break
 
 def main_path(aux_file, main_ext):
     """takes path to an aux file and the extension of its main file.
@@ -86,7 +85,7 @@ def nx_upload(aux_file, main_file, local_directory, nuxeo_dir):
     while attempts <= 3:
         upload = extrafile(aux_file, main_file, local_directory, nuxeo_dir)
         attempts += 1
-        if file_status(upload) == 500:
+        if "500" in file_status(upload):
             upload = extrafile(aux_file, main_file, local_directory, nuxeo_dir)
         else:
             break
@@ -96,7 +95,10 @@ def nx_upload(aux_file, main_file, local_directory, nuxeo_dir):
 def file_status(output):
     """ Parse stdout to get upload status.
     """
-    status_code = int(output.split("\n", 1)[1][145:156].split(": ")[1])
+    try:
+        status_code = output.split("\n", 1)[1][145:156].split(": ")[1]
+    except IndexError:
+        status_code = output.split("\n", 1)[1][145:156]
 
     return status_code
 
